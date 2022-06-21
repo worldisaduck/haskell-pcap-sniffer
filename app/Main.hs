@@ -16,24 +16,8 @@ import qualified Data.Text as T
 import qualified Parser.Main as P
 
 ethernetHeaderLength = 14
-ipHeaderLength = 24
-
--- data TcpHdr = TcpHdr {
---     srcPort :: Word16,
---     dstPort :: Word16,
---     seqNum :: Word32,
---     ackNum :: Word32,
---     urg :: Bool,
---     ack :: Bool,
---     psh :: Bool,
---     pst :: Bool,
---     syn :: Bool,
---     fin :: Bool,
---     window :: Word16,
---     checksum :: Word16,
---     urgPointer :: Word16,
---     data :: [Word8]
--- }
+ipHeaderLength = 20
+tpcHeaderLength = 24
 
 -- dump = "64eeb7ef19d00800"
 
@@ -49,8 +33,8 @@ handlePacket :: PktHdr -> Ptr Word8 -> IO ()
 handlePacket (PktHdr _ _ _ hdrCaptureLength) startPtr= do
   putStrLn "START OF THE PACKET\n"
   rawPacket <- evalStateT getPacketByteString startPtr
-  parsedPacker <- P.parsePacket rawPacket
-  putStrLn $ show parsedPacker
+  parsedPacket <- P.parsePacket rawPacket
+  putStrLn $ show parsedPacket
   putStrLn "END OF THE PACKET\n"
   return ()
 

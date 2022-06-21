@@ -1,4 +1,4 @@
-module Parser.Utils (word16, anyWord16, satisfyWithWord16) where
+module Parser.Utils (word16, anyWord16, satisfyWithWord16, anyWord32) where
 
 import Data.Attoparsec.ByteString (word8, anyWord8, Parser)
 import Data.ByteString (ByteString)
@@ -26,3 +26,9 @@ satisfyWithWord16 f p = do
   if p a
      then return a
      else fail "satisfyWithWord16"
+
+anyWord32 :: Parser Word32
+anyWord32 = do
+  a <- anyWord16
+  b <- anyWord16
+  return $ (fromIntegral a `shiftL` 16) .|. fromIntegral b
