@@ -13,11 +13,20 @@ import Control.Monad.State.Lazy (StateT, evalStateT, get, put, state, liftIO, li
 import Text.Hex
 import Text.Printf
 import qualified Data.Text as T
+import qualified Parser.Ipv4 as Ipv4 (IpHdr, parser)
+import qualified Parser.Ethernet as Ethernet (EthernetHdr, parser)
 import qualified Parser.Main as P
 
 ethernetHeaderLength = 14
 ipHeaderLength = 20
-tpcHeaderLength = 24
+tcpHeaderLength = 24
+
+
+data RawPacket = RawPacket {
+  ethernetHeader :: ByteString,
+  ipHeader :: ByteString,
+  tcpHeader :: ByteString
+}
 
 -- dump = "64eeb7ef19d00800"
 
@@ -40,7 +49,7 @@ handlePacket (PktHdr _ _ _ hdrCaptureLength) startPtr= do
 
 getPacketByteString :: StateT (Ptr Word8) IO ByteString
 getPacketByteString = do
-  bs <- readNBytes $ ethernetHeaderLength + ipHeaderLength
+  bs <- readNBytes $ ethernetHeaderLength + ipHeaderLength + tcpHeaderLength
   return $ BS.pack bs
 
 readNBytes :: Int -> StateT (Ptr Word8) IO [Word8]

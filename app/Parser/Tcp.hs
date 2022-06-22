@@ -1,3 +1,5 @@
+{-# LANGUAGE NamedFieldPuns #-}
+
 module Parser.Tcp where
 
 import Data.ByteString (ByteString)
@@ -22,11 +24,25 @@ data TcpHdr = TcpHdr {
   window :: Word16,
   checksum :: Word16,
   urgPointer :: Word16,
-  data :: [Word8]
+  _data :: [Word8]
 }
 
+instance Show TcpHdr where
+  show TcpHdr{srcPort, dstPort, seqNum, ackNum, urg, ack, psh, pst, syn, fin} =
+    "srcPort: " ++ show srcPort ++ "\n" ++
+    "dstPort: " ++ show dstPort ++ "\n" ++
+    "seqNum: " ++ show seqNum ++ "\n" ++
+    "ackNum: " ++ show ackNum ++ "\n" ++
+    (if urg then "URG\n" else "") ++
+    (if ack then "ACK\n" else "") ++
+    (if psh then "PSH\n" else "") ++
+    (if pst then "PST\n" else "") ++
+    (if syn then "SYN\n" else "") ++
+    (if fin then "FIN\n" else "")
+
+
 parser :: Int -> Parser TcpHdr
-parser = dataLength do
+parser dataLength = do
   srcPort <- anyWord16
   dstPort <- anyWord16
   seqNum <- anyWord32
@@ -39,6 +55,7 @@ parser = dataLength do
   urgPointer <- anyWord16
   optionsPadding <- anyWord32
   _data <- replicateM dataLength anyWord8
+  return $ TcpHdr srcPort dstPort seqNum ackNum urg ack psh pst syn fin window checksum urgPointer []
 
 parseFlags :: Word8 -> (Bool, Bool, Bool, Bool, Bool, Bool)
 parseFlags flagsBits =
